@@ -14,7 +14,7 @@ class ProductController extends Controller
         $products = Product::get();
 
         // check if there are records
-        if ($products->countBy() > 0) {
+        if ($products->count() > 0) {
             return ProductResource::collection($products);
         }
         else {
