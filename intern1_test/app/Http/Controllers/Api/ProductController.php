@@ -50,7 +50,6 @@ class ProductController extends Controller
     }
 
     public function show(Product $product) {
-        // add validation here
         return new ProductResource($product) ;
     }
 
