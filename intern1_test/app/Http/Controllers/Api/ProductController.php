@@ -11,41 +11,36 @@ use Illuminate\Support\Facades\Validator;
 class ProductController extends Controller
 {
     public function index() {
+        // get records from DB
         $products = Product::get();
 
         // check if there are records
         if ($products->count() > 0) {
+            // return data in JsonResource format using ProductResource
             return ProductResource::collection($products);
         }
         else {
+            // else, return a message in json format
             return response()->json(['message' => 'No records found'], 200);
         }
     }
 
     public function store(Request $request) {
         // validation
-        $validator = Validator::make($request->all(), [
-            'name' => 'required|string|max:255',
-            'description' => 'required',
-            'price' => 'required|integer'
-        ]);
-
-        if($validator->fails()) {
-            return response()->json([
-                'message' => "All fields are mandatory",
-                'error' => $validator->messages()
-            ], 422);
-        }
+        $validated_input = request()->validate(
+            [
+                'name' => 'required|string|max:255',
+                'description' => 'required',
+                'price' => 'required|integer'
+                ]
+        );
         // add to database
-        $product = Product::create([
-            'name' => $request->name,
-            'description' => $request->description,
-            'price' => $request->price
-        ]);
+        Product::create($validated_input);
 
+        // return a confirmation message and the added data in json format
         return response()->json([
             'message' => 'Product Created Successfully',
-            'data' => new ProductResource($product)
+            'data' => new ProductResource($validated_input)
         ], 200);
     }
 
@@ -53,27 +48,20 @@ class ProductController extends Controller
         return new ProductResource($product) ;
     }
 
-    public function update(Request $request, Product $product) {
+    public function update(Product $product) {
         // validation
-        $validator = Validator::make($request->all(), [
-            'name' => 'required|string|max:255',
-            'description' => 'required',
-            'price' => 'required|integer'
-        ]);
+        $validated_input = request()->validate(
+            [
+                'name' => 'required|string|max:255',
+                'description' => 'required',
+                'price' => 'required|integer'
+                ]
+        );
 
-        if($validator->fails()) {
-            return response()->json([
-                'message' => "All fields are mandatory",
-                'error' => $validator->messages()
-            ], 422);
-        }
         // update product from database
-        $product->update([
-            'name' => $request->name,
-            'description' => $request->description,
-            'price' => $request->price
-        ]);
+        $product->update($validated_input);
 
+        // return a confirmation message and the updated data in json format
         return response()->json([
             'message' => 'Product Updated Successfully',
             'data' => new ProductResource($product)
